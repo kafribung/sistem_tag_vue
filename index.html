@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Sistem Tag</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 10% auto;
+            width: 80%;
+        }
+        
+        input:focus {
+            outline: none;
+        }
+        
+        #tag-from,
+        #tag-temp-wrapper,
+        .tag-temp {
+            display: flex;
+        }
+        
+        #tag-from {
+            border: 1px solid black;
+            height: 25px;
+        }
+        
+        #tag-input {
+            height: 25px;
+            width: 100%;
+            overflow: auto;
+        }
+        
+        #tag-list {
+            list-style-type: none;
+            padding-left: 5px;
+            border: 1px solid black;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .active {
+            background: rgb(252, 154, 8);
+            color: whitesmoke;
+        }
+        
+        .tag-temp {
+            background: rgb(252, 154, 8);
+            color: whitesmoke;
+            padding: 2px 4px;
+            margin: 2px;
+        }
+        
+        .close-tag-temp {
+            background: rgb(229, 232, 233);
+            color: red;
+            width: 15px;
+            height: 15px;
+            border-radius: 15px;
+            padding: 5px;
+            margin-left: 5px;
+            line-height: 15px;
+        }
+    </style>
+</head>
+
+<!-- Todo 
+1. Menampilkan data2 Ketika user selesai mengetik (done);
+2. User bisa memilih menggunakan dari arraykeyup-keydown, hightlight (done)
+3. Saran berdasarkan yg diketik user (done)
+4. On enter, masukkan dafar pilihan ke menu input (done)
+5. Backspace /ddelete menghapus elemen berikutnya (done)
+6. Hapus element menggunakan klik X (done)
+7.
+
+
+-->
+
+<body>
+    <div id="app">
+        <h1>Vue.JS Tag System</h1>
+        <input type="text" name="tags" v-model="tagTemps">
+
+
+        <br><br>
+
+        <div id="tag-from">
+            <span id="tag-temp-wrapper">
+                <span class="tag-temp" v-for="(tagTemp, index) in tagTemps" :key="index">
+                    {{tagTemp}}
+                    <span class="close-tag-temp" v-on:click="removeTags(tagTemp)">X</span>
+            </span>
+            </span>
+
+            <input type="text" id="tag-input" v-on:keyup="showList" v-on:keyup.down="filterdown" @keyup.up="filterup" @keyup.enter="addTags" @keyup.delete="removeTags" v-model="keyword">
+        </div>
+
+        <ul id="tag-list" v-bind:class="{hidden : isHidden }">
+            <li class="tags" v-for="(tag, index) in filteredTags" :key="index" @mouseover="mouseOver" @mouseleave="mouseLeave" @click="addTags('viaClick', $event)">{{tag}}</li>
+        </ul>
+
+    </div>
+
+
+</body>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script>
+    new Vue({
+        el: "#app",
+        data: {
+            tags: ['php', 'javascript', 'c++', 'database', 'vueJS', 'laravel'],
+            isHidden: true,
+            arrowKeys: 0,
+            keyword: '',
+            tagTemps: [],
+
+        },
+        computed: {
+            filteredTags: function() {
+
+                return this.tags.filter(tag => tag.indexOf(this.keyword) >= 0);
+            }
+        },
+        methods: {
+            showList: function() {
+                this.isHidden = false
+            },
+
+            filterdown: function() {
+                this.setHighlight(1);
+            },
+
+            filterup: function() {
+                this.setHighlight(-1);
+            },
+
+            setHighlight: function(val) {
+                var _tags = document.querySelectorAll('.tags');
+                var _isFirst = true;
+
+                _tags.forEach(element => {
+                    if (element.classList.contains('active')) {
+                        _isFirst = false;
+                        element.classList.remove('active');
+                    }
+                });
+
+                (this.arrowKeys += val) - 1;
+
+                // Limit List
+                if (this.arrowKeys < 0) {
+                    this.arrowKeys = 0;
+                } else if (this.arrowKeys >= _tags.length) {
+                    this.arrowKeys = _tags.length - 1;
+                }
+
+                if (_isFirst) {
+                    _tags[0].classList.add('active');
+                } else _tags[this.arrowKeys].classList.add('active');
+
+
+
+            },
+            addTags: function(via, event) {
+                if (via == 'viaClick') {
+                    var _tags = event.target.textContent;
+                } else
+                    var _tags = document.getElementsByClassName('tags')[this.arrowKeys].textContent;
+
+                this.tagTemps.push(_tags);
+                this.keyword = '';
+                this.isHidden = true
+
+            },
+
+            removeTags: function(el) {
+                if (typeof(el) === 'string') {
+                    var index = this.tagTemps.indexOf(el);
+                    this.tagTemps.splice(index, 1);
+                } else {
+                    this.tagTemps.pop();
+                }
+            },
+            mouseOver: function(event) {
+                event.target.classList.add('active');
+            },
+
+            mouseLeave: function(event) {
+                event.target.classList.remove('active');
+            }
+        },
+
+
+    });
+</script>
+
+</html
